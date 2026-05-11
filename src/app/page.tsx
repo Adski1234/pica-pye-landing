@@ -143,6 +143,7 @@ export default function App() {
 
         .wireframe-grid {
             width: 100%;
+            min-height: 100vh;
             display: grid;
             grid-template-columns: 1.2fr 1fr 1.2fr 1fr 60px;
             border-top: 1px solid var(--grid-line);
@@ -307,11 +308,50 @@ export default function App() {
             position: relative;
         }
 
-        @media (max-width: 1024px) {
-            .wireframe-grid { grid-template-columns: 1fr; }
+        /* Tablet */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .wireframe-grid {
+                grid-template-columns: 1fr 1fr;
+                min-height: auto;
+            }
+            .wireframe-grid .cell {
+                grid-column: auto !important;
+                grid-row: auto !important;
+            }
             .hide-mobile { display: none !important; }
-            .col-span-4, .col-span-2, .col-span-3 { grid-column: span 1 / span 1 !important; }
-            .huge-text { font-size: 2.5rem; white-space: normal; word-break: break-word;}
+            .sidebar-icons { display: none !important; }
+            .huge-text {
+                font-size: clamp(2.5rem, 6vw, 5rem);
+                white-space: normal;
+                word-break: break-word;
+            }
+            .ai-core-graphic { transform: scale(0.75); }
+        }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+            .wireframe-grid {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+            .wireframe-grid .cell {
+                grid-column: 1 / -1 !important;
+                grid-row: auto !important;
+            }
+            .wireframe-grid .cell:first-child {
+                min-height: 80px;
+            }
+            .hide-mobile { display: none !important; }
+            .sidebar-icons { display: none !important; }
+            .huge-text {
+                font-size: clamp(2.2rem, 14vw, 4rem);
+                white-space: normal;
+                word-break: break-word;
+                line-height: 0.9;
+            }
+            .ai-core-graphic { transform: scale(0.6); }
+            .modal-content { padding: 1.5rem; width: 95%; }
+            .audit-result { max-height: 50vh; }
         }
 
         .modal-overlay {
