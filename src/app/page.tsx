@@ -648,37 +648,37 @@ export default function App() {
         <div className="cell p-6 flex flex-col gap-3" style={{ gridColumn: "4 / 5" }}>
           <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Get in touch</p>
           {contactState === "sent" ? (
-            <p className="text-sm text-green-400">Message sent — we&apos;ll be in touch.</p>
+            <p className="text-sm text-green-600">Message sent — we&apos;ll be in touch.</p>
           ) : (
-            <form action={contactAction} className="flex flex-col gap-2">
+            <form action={contactAction} autoComplete="off" className="flex flex-col gap-2">
               <input
                 name="name"
                 type="text"
                 required
                 placeholder="Name"
-                className="bg-transparent border border-gray-700 rounded px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-400"
+                className="bg-transparent border border-gray-400 rounded px-3 py-1.5 text-sm text-black placeholder-gray-400 focus:outline-none focus:border-gray-700"
               />
               <input
                 name="email"
                 type="email"
                 required
                 placeholder="Email"
-                className="bg-transparent border border-gray-700 rounded px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-400"
+                className="bg-transparent border border-gray-400 rounded px-3 py-1.5 text-sm text-black placeholder-gray-400 focus:outline-none focus:border-gray-700"
               />
               <textarea
                 name="message"
                 required
                 rows={3}
                 placeholder="Message"
-                className="bg-transparent border border-gray-700 rounded px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-400 resize-none"
+                className="bg-transparent border border-gray-400 rounded px-3 py-1.5 text-sm text-black placeholder-gray-400 focus:outline-none focus:border-gray-700 resize-none"
               />
               {contactState === "error" && (
-                <p className="text-xs text-red-400">Something went wrong. Please try again.</p>
+                <p className="text-xs text-red-600">Something went wrong. Please try again.</p>
               )}
               <button
                 type="submit"
                 disabled={contactPending}
-                className="self-start px-4 py-1.5 text-xs font-bold uppercase tracking-wider border border-gray-500 text-gray-300 hover:border-white hover:text-white transition-colors disabled:opacity-40"
+                className="self-start px-4 py-1.5 text-xs font-bold uppercase tracking-wider border border-gray-500 text-black hover:border-black transition-colors disabled:opacity-40"
               >
                 {contactPending ? "Sending…" : "Send"}
               </button>
