@@ -73,10 +73,6 @@ export default function App() {
     "idle"
   );
 
-  // Execution environment injects API key here.
-  // In a real Next.js app, use process.env.NEXT_PUBLIC_GEMINI_API_KEY
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-
   const openAuditModal = () => setIsModalOpen(true);
   const closeAuditModal = () => {
     setIsModalOpen(false);
@@ -91,26 +87,6 @@ export default function App() {
     }
   };
 
-  const fetchWithRetry = async (
-    url: string,
-    options: RequestInit,
-    maxRetries: number = 5,
-  ): Promise<unknown> => {
-    const delays: number[] = [1000, 2000, 4000, 8000, 16000];
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-      } catch (e) {
-        if (i === maxRetries - 1) throw e;
-        await new Promise((resolve) => setTimeout(resolve, delays[i]));
-      }
-    }
-  };
-
   const generateAudit = async () => {
     if (!businessInput.trim()) {
       setErrorMsg("Please describe your business and bottleneck first.");
@@ -121,48 +97,18 @@ export default function App() {
     setAuditResult("");
     setIsLoading(true);
 
-    const systemPrompt =
-      "You are an expert digital transformation consultant at PicaPye, targeting SMEs and Voluntary Orgs. The user will provide a description of their business and a workflow bottleneck. Provide a concise, highly actionable 3-step digital transformation plan resolving their issue. Focus on PicaPye's services: AI integration, Workflow Optimization, GDPR AI Audits, or Local LLMs. Keep the tone encouraging, professional, and slightly tech-forward. Format the response as clean HTML using only <h3> for step titles, <p> for descriptions, and <ul>/<li> for bullet points. Do not include markdown formatting ticks (```html). Start directly with the first <h3>.";
-
-    const payload = {
-      contents: [{ parts: [{ text: businessInput }] }],
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-    };
-
     try {
-      const data = await fetchWithRetry(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      const res = await fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessInput }),
+      });
 
-      const candidates = (data as Record<string, unknown>)
-        .candidates as unknown[];
-      const firstCandidate =
-        candidates && candidates.length > 0 ? candidates[0] : undefined;
-      const contentObj = firstCandidate
-        ? ((firstCandidate as Record<string, unknown>).content as Record<
-            string,
-            unknown
-          >)
-        : undefined;
-      const parts = contentObj ? (contentObj.parts as unknown[]) : undefined;
-      const firstPart =
-        parts && Array.isArray(parts) && parts.length > 0
-          ? (parts[0] as Record<string, unknown>)
-          : undefined;
-      const textValue: unknown = firstPart?.text;
-      let generatedText: string = "Unable to generate audit at this time.";
-      if (typeof textValue === "string") {
-        generatedText = textValue;
-      }
-      generatedText = generatedText.replace(/```html/g, "").replace(/```/g, "");
+      if (!res.ok) throw new Error("Request failed");
 
-      setAuditResult(generatedText);
-    } catch (error: unknown) {
+      const { html } = await res.json();
+      setAuditResult(html ?? "Unable to generate audit at this time.");
+    } catch {
       setErrorMsg(
         "An error occurred while connecting to the PicaPye AI Engine. Please check your connection and try again",
       );
@@ -192,15 +138,11 @@ export default function App() {
             font-family: var(--font-mono);
             min-height: 100vh;
             margin: 0;
-            padding: 2vw;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            padding: 0;
         }
 
         .wireframe-grid {
             width: 100%;
-            max-width: 1600px;
             display: grid;
             grid-template-columns: 1.2fr 1fr 1.2fr 1fr 60px;
             border-top: 1px solid var(--grid-line);
