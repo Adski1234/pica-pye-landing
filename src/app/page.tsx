@@ -53,25 +53,26 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  const [contactState, contactAction, contactPending] = useActionState(
-    async (_prev: string, formData: FormData) => {
-      try {
-        await fetch("/api/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formData.get("name"),
-            email: formData.get("email"),
-            message: formData.get("message"),
-          }),
-        });
-        return "sent";
-      } catch {
-        return "error";
-      }
-    },
-    "idle"
-  );
+  const contactFetcher = async (_prev: string, formData: FormData) => {
+    try {
+      await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          email: formData.get("email"),
+          message: formData.get("message"),
+        }),
+      });
+      return "sent";
+    } catch {
+      return "error";
+    }
+  };
+
+  const [contactState, contactAction, contactPending] = useActionState(contactFetcher, "idle");
+  const [modalContactState, modalContactAction, modalContactPending] = useActionState(contactFetcher, "idle");
+  const [showModalContact, setShowModalContact] = useState(false);
 
   const openAuditModal = () => setIsModalOpen(true);
   const closeAuditModal = () => {
@@ -79,6 +80,7 @@ export default function App() {
     setAuditResult("");
     setErrorMsg("");
     setBusinessInput("");
+    setShowModalContact(false);
   };
 
   const handleModalBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -800,6 +802,58 @@ export default function App() {
                   Here is your tailored PicaPye Strategy:
                 </p>
                 <div dangerouslySetInnerHTML={{ __html: auditResult }} />
+
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  {!showModalContact ? (
+                    <button
+                      className="btn-primary w-full py-3 text-sm"
+                      onClick={() => setShowModalContact(true)}
+                    >
+                      Work with PicaPye on this →
+                    </button>
+                  ) : modalContactState === "sent" ? (
+                    <p className="text-green-600 font-bold text-sm text-center py-2">
+                      Message sent — we&apos;ll be in touch shortly!
+                    </p>
+                  ) : (
+                    <div>
+                      <p className="font-sans-bold text-base mb-3 text-black">Get in touch</p>
+                      <form action={modalContactAction} autoComplete="off" className="flex flex-col gap-2">
+                        <input
+                          name="name"
+                          type="text"
+                          required
+                          placeholder="Name"
+                          className="border border-gray-300 rounded px-3 py-2 text-sm text-black placeholder-gray-400 focus:outline-none focus:border-gray-600 w-full"
+                        />
+                        <input
+                          name="email"
+                          type="email"
+                          required
+                          placeholder="Email"
+                          className="border border-gray-300 rounded px-3 py-2 text-sm text-black placeholder-gray-400 focus:outline-none focus:border-gray-600 w-full"
+                        />
+                        <textarea
+                          name="message"
+                          required
+                          rows={3}
+                          defaultValue={`Hi, I just received my PicaPye AI audit and I'd love to discuss next steps.`}
+                          className="border border-gray-300 rounded px-3 py-2 text-sm text-black focus:outline-none focus:border-gray-600 w-full resize-none"
+                        />
+                        {modalContactState === "error" && (
+                          <p className="text-xs text-red-600">Something went wrong. Please try again.</p>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={modalContactPending}
+                          className="btn-primary w-full py-3 text-sm disabled:opacity-40"
+                        >
+                          {modalContactPending ? "Sending…" : "Send Message"}
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
