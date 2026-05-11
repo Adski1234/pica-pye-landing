@@ -104,13 +104,13 @@ export default function App() {
         body: JSON.stringify({ businessInput }),
       });
 
-      if (!res.ok) throw new Error("Request failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Request failed");
 
-      const { html } = await res.json();
-      setAuditResult(html ?? "Unable to generate audit at this time.");
-    } catch {
+      setAuditResult(data.html ?? "Unable to generate audit at this time.");
+    } catch (err) {
       setErrorMsg(
-        "An error occurred while connecting to the PicaPye AI Engine. Please check your connection and try again",
+        err instanceof Error ? err.message : "An error occurred. Please try again.",
       );
     } finally {
       setIsLoading(false);

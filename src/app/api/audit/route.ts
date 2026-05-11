@@ -16,15 +16,23 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "API key not configured" }, { status: 500 });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_PROMPT,
-  });
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
+    });
 
-  const result = await model.generateContent(businessInput);
-  const text = result.response.text();
-  const html = text.replace(/```html/g, "").replace(/```/g, "");
+    const result = await model.generateContent(businessInput);
+    const text = result.response.text();
+    const html = text.replace(/```html/g, "").replace(/```/g, "");
 
-  return Response.json({ html });
+    return Response.json({ html });
+  } catch (err) {
+    console.error("Gemini SDK error:", err);
+    return Response.json(
+      { error: err instanceof Error ? err.message : "Unknown error" },
+      { status: 502 }
+    );
+  }
 }
